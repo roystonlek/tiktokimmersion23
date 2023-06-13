@@ -27,14 +27,16 @@ func (s *IMServiceImpl) Send(ctx context.Context, req *rpc.SendRequest) (*rpc.Se
 	defer db.Close()
 	insert, err := db.Query("INSERT INTO test (chat, text, sender, send_time) VALUES (?, ?, ?, ?)", req.Message.Chat, req.Message.Text, req.Message.Sender, req.Message.SendTime)
 	if err != nil {
-		panic(err.Error())
+		resp := rpc.NewSendResponse()
+		resp.Code, resp.Msg = 500, "failure in sending message..."
+		return resp, nil
 	}
 	defer insert.Close()
 
 	resp := rpc.NewSendResponse()
 	fmt.Println("receive message: ", req.String())
 
-	resp.Code, resp.Msg = 0, req.Message.String()
+	resp.Code, resp.Msg = 0, "Message sent successfully"
 	return resp, nil
 }
 
@@ -47,7 +49,9 @@ func (s *IMServiceImpl) Pull(ctx context.Context, req *rpc.PullRequest) (*rpc.Pu
 	get, err := db.Query("select chat, sender, text , send_time from test where chat = ? order by send_time limit ? offset ?", req.Chat, req.Limit, req.Cursor)
 	//  order by send_time limit ? offset ?  , req.Limit, req.Cursor
 	if err != nil {
-		panic(err.Error())
+		resp := rpc.NewPullResponse()
+		resp.Code, resp.Msg = 500, "failure in pulling message..."
+		return resp, nil
 	}
 	defer get.Close()
 	fmt.Println("Pulled messages from databases")
@@ -60,7 +64,9 @@ func (s *IMServiceImpl) Pull(ctx context.Context, req *rpc.PullRequest) (*rpc.Pu
 		var curMsg Message
 		err := get.Scan(&curMsg.chat, &curMsg.sender, &curMsg.text, &curMsg.send_time)
 		if err != nil {
-			panic(err.Error())
+			resp := rpc.NewPullResponse()
+			resp.Code, resp.Msg = 500, "failure in pulling message..."
+			return resp, nil
 		}
 		messages = append(messages, curMsg)
 		fmt.Println(curMsg)
@@ -77,6 +83,12 @@ func (s *IMServiceImpl) Pull(ctx context.Context, req *rpc.PullRequest) (*rpc.Pu
 			SendTime: msg.send_time,
 		})
 	}
+	if *req.Reverse {
+		for i, j := 0, len(resp.Messages)-1; i < j; i, j = i+1, j-1 {
+			resp.Messages[i], resp.Messages[j] = resp.Messages[j], resp.Messages[i]
+		}
+	}
+
 	// declare nextCursor as i64
 	nextCursor := int64(0)
 	if len(messages) == 0 {
@@ -89,7 +101,9 @@ func (s *IMServiceImpl) Pull(ctx context.Context, req *rpc.PullRequest) (*rpc.Pu
 
 	getCount, err := db.Query(queryStatement2)
 	if err != nil {
-		panic(err)
+		resp := rpc.NewPullResponse()
+		resp.Code, resp.Msg = 500, "failure in pulling message..."
+		return resp, nil
 	}
 	defer getCount.Close()
 
@@ -104,6 +118,7 @@ func (s *IMServiceImpl) Pull(ctx context.Context, req *rpc.PullRequest) (*rpc.Pu
 	if !hasMore {
 		nextCursor = 0
 	}
+	resp.Code, resp.Msg = 0, "success"
 	resp.HasMore = &hasMore
 	resp.NextCursor = &nextCursor
 	return resp, nil
