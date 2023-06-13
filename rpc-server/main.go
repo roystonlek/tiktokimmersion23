@@ -22,9 +22,9 @@ func main() {
 	}
 
 	// Create the tables in the database.
-	drop, _ := db.Query("DROP TABLE IF EXISTS messages")
+	drop, _ := db.Query("DROP TABLE IF EXISTS test")
 	defer drop.Close()
-	create, err := db.Query("CREATE TABLE messages (id int PRIMARY KEY AUTO_INCREMENT, chat varchar(255) NOT NULL, text varchar(255) NOT NULL ,sender varchar(255) NOT NULL, send_time BIGINT NOT NULL )")
+	create, err := db.Query("CREATE TABLE test (id int PRIMARY KEY AUTO_INCREMENT, chat varchar(255) NOT NULL, text varchar(255) NOT NULL ,sender varchar(255) NOT NULL, send_time BIGINT NOT NULL )")
 	if err != nil {
 		panic(err.Error())
 	}

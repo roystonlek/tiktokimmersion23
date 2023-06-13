@@ -25,13 +25,14 @@ func (s *IMServiceImpl) Send(ctx context.Context, req *rpc.SendRequest) (*rpc.Se
 		panic(err.Error())
 	}
 	defer db.Close()
-	insert, err := db.Query("INSERT INTO messages (chat, text, sender, send_time) VALUES (?, ?, ?, ?)", req.Message.Chat, req.Message.Text, req.Message.Sender, req.Message.SendTime)
+	insert, err := db.Query("INSERT INTO test (chat, text, sender, send_time) VALUES (?, ?, ?, ?)", req.Message.Chat, req.Message.Text, req.Message.Sender, req.Message.SendTime)
 	if err != nil {
 		panic(err.Error())
 	}
 	defer insert.Close()
 
 	resp := rpc.NewSendResponse()
+	fmt.Println("receive message: ", req.String())
 
 	resp.Code, resp.Msg = 0, req.Message.String()
 	return resp, nil
@@ -43,7 +44,7 @@ func (s *IMServiceImpl) Pull(ctx context.Context, req *rpc.PullRequest) (*rpc.Pu
 		panic(err.Error())
 	}
 	defer db.Close()
-	get, err := db.Query("select chat, sender, text , send_time from messages where chat = ? order by send_time limit ? offset ?", req.Chat, req.Limit, req.Cursor)
+	get, err := db.Query("select chat, sender, text , send_time from test where chat = ? order by send_time limit ? offset ?", req.Chat, req.Limit, req.Cursor)
 	//  order by send_time limit ? offset ?  , req.Limit, req.Cursor
 	if err != nil {
 		panic(err.Error())
@@ -84,7 +85,7 @@ func (s *IMServiceImpl) Pull(ctx context.Context, req *rpc.PullRequest) (*rpc.Pu
 		nextCursor = start + retr
 	}
 
-	queryStatement2 := fmt.Sprintf("SELECT COUNT(id) FROM messages WHERE chat = '%v'", req.Chat)
+	queryStatement2 := fmt.Sprintf("SELECT COUNT(id) FROM test WHERE chat = '%v'", req.Chat)
 
 	getCount, err := db.Query(queryStatement2)
 	if err != nil {
