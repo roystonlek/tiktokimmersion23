@@ -2,10 +2,10 @@
 namespace go rpc
 
 struct Message {
-    1: string Chat   // format "<member1>:<member2>", e.g. "john:doe"
-    2: string Text   // message text content
-    3: string Sender // sender identifier
-    4: i64 SendTime  // unit: microseconds
+    1: string Chat   `json:"chat"` // format "<member1>:<member2>", e.g. "john:doe"
+    2: string Text   `json:"text"` // message text content
+    3: string Sender `json:"sender"` // sender identifier
+    4: i64 SendTime  `json:"send_time"` // unit: microseconds
 }
 
 struct SendRequest {
