@@ -22,7 +22,7 @@ type IMServiceImpl struct{}
 func (s *IMServiceImpl) Send(ctx context.Context, req *rpc.SendRequest) (*rpc.SendResponse, error) {
 	db, err := sql.Open("mysql", "root:root@tcp(mysql:3306)/tiktok")
 	if err != nil {
-		panic(err.Error())
+		panic("Here is the error "+err.Error())
 	}
 	defer db.Close()
 	insert, err := db.Query("INSERT INTO test (chat, text, sender, send_time) VALUES (?, ?, ?, ?)", req.Message.Chat, req.Message.Text, req.Message.Sender, req.Message.SendTime)
