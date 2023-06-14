@@ -9,8 +9,8 @@ services:
       - SERVICE_TAGS=rpc
     restart: on-failure
     depends_on:
-      - etcd
       - mysql
+      - etcd
   http-server:
     build: http-server
     ports:
@@ -25,6 +25,7 @@ services:
     image: mysql:latest
     ports:
       - "3306:3306"
+    restart: always
     environment:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_DATABASE=tiktok
@@ -36,6 +37,13 @@ services:
       - etcd
   etcd:
     image: quay.io/coreos/etcd:v3.5.0
-    command: ["etcd", "--advertise-client-urls", "http://etcd:2379", "--listen-client-urls", "http://0.0.0.0:2379"]
+    command:
+      [
+        "etcd",
+        "--advertise-client-urls",
+        "http://etcd:2379",
+        "--listen-client-urls",
+        "http://0.0.0.0:2379"
+      ]
     ports:
       - "2379:2379"
