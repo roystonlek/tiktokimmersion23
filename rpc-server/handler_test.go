@@ -1,7 +1,7 @@
 package main
 
 import (
-	"assignment_demo_2023/http-server/kitex_gen/rpc"
+	// "assignment_demo_2023/http-server/kitex_gen/rpc"
 	"context"
 	"errors"
 	"testing"
